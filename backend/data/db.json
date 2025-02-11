@@ -1,0 +1,337 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "dingmei",
+      "password": "076111085",
+      "role": "store",
+      "phone": "09xx-xxxxxx",
+      "lineId": "storeLineId"
+    },
+    {
+      "id": 2,
+      "username": "testUser",
+      "password": "123456",
+      "role": "customer",
+      "phone": "0987-654321",
+      "lineId": "customerLine"
+    },
+    {
+      "id": 368408,
+      "username": "王浦丞",
+      "password": "dcfc5475",
+      "role": "customer",
+      "lineId": "technology030",
+      "phone": ""
+    },
+    {
+      "id": 802574,
+      "username": "王小明",
+      "password": "dcfc5475",
+      "role": "customer",
+      "lineId": "123456",
+      "phone": ""
+    },
+    {
+      "id": 129427,
+      "username": "王大明",
+      "password": "dcfc5475",
+      "role": "customer",
+      "lineId": "456789",
+      "phone": ""
+    },
+    {
+      "id": 422438,
+      "username": "王大",
+      "password": "456",
+      "role": "customer",
+      "lineId": "",
+      "phone": ""
+    }
+  ],
+  "orders": [
+    {
+      "orderId": 1739257646372,
+      "userId": 2,
+      "items": {
+        "西裝外套": 1
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T07:07:56.130Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739257655621,
+      "userId": 2,
+      "items": {
+        "西裝外套": 1
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T07:07:39.909Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739257670090,
+      "userId": 2,
+      "items": {
+        "皮衣": 1
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T08:03:46.726Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739260304160,
+      "userId": 2,
+      "items": {
+        "普通被子": 1,
+        "毛衣": 2
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T08:03:46.726Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 160
+    },
+    {
+      "orderId": 1739260903981,
+      "userId": 2,
+      "items": {
+        "襯衫": 1,
+        "西裝外套": 1
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T08:03:46.726Z",
+      "isFrequent": true,
+      "extraFee": 0,
+      "totalPrice": 45
+    },
+    {
+      "orderId": 1739261006777,
+      "userId": 2,
+      "items": {
+        "西裝褲": 1,
+        "西裝外套": 1,
+        "襯衫": 1
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T08:03:46.726Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 150
+    },
+    {
+      "orderId": 1739262560610,
+      "userId": 802574,
+      "items": {
+        "襯衫": 1,
+        "普通被子": 1,
+        "皮衣": 1,
+        "褲子": 2
+      },
+      "date": "2025-02-11",
+      "status": "washing",
+      "washedTime": "",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 50
+    },
+    {
+      "orderId": 1739262579179,
+      "userId": 368408,
+      "items": {
+        "西裝外套": 2
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T08:29:44.534Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739262684036,
+      "userId": 368408,
+      "items": {
+        "西裝外套": 2
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T08:31:30.955Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739266821298,
+      "userId": 129427,
+      "items": {
+        "西裝外套": 2,
+        "普通被子": 2
+      },
+      "date": "2025-02-11",
+      "status": "washed",
+      "washedTime": "2025-02-11T09:45:59.647Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739267150381,
+      "userId": 802574,
+      "items": {
+        "襯衫": 1,
+        "牛仔褲": 1,
+        "普通外套": 1,
+        "厚毯": 1,
+        "皮衣": 1,
+        "褲子": 1
+      },
+      "date": "2025-02-11",
+      "status": "washed",
+      "washedTime": "2025-02-11T10:08:19.523Z",
+      "isFrequent": true,
+      "extraFee": 0,
+      "totalPrice": 115
+    },
+    {
+      "orderId": 1739267182989,
+      "userId": 2,
+      "items": {
+        "普通被子": 2
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T09:46:27.988Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739267721402,
+      "userId": 368408,
+      "items": {
+        "皮衣": 2
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T09:55:35.062Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739267725984,
+      "userId": 368408,
+      "items": {
+        "衣服": 2
+      },
+      "date": "2025-02-11",
+      "status": "picked",
+      "washedTime": "2025-02-11T09:55:35.062Z",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 0
+    },
+    {
+      "orderId": 1739267729871,
+      "userId": 368408,
+      "items": {
+        "西裝褲": 2
+      },
+      "date": "2025-02-11",
+      "status": "washing",
+      "washedTime": "",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 200
+    },
+    {
+      "orderId": 1739268516855,
+      "userId": 802574,
+      "items": {
+        "襯衫": 1,
+        "西裝褲": 1,
+        "西裝外套": 1,
+        "普通被子": 1,
+        "皮衣": 1
+      },
+      "date": "2025-02-11",
+      "status": "washing",
+      "washedTime": "",
+      "isFrequent": false,
+      "extraFee": 0,
+      "totalPrice": 150
+    }
+  ],
+  "prices": {
+    "normal": {
+      "襯衫": 50,
+      "POLO衫": 60,
+      "毛衣": 80,
+      "T恤": 50,
+      "西裝褲": 100,
+      "牛仔褲": 80
+    },
+    "frequent": {
+      "襯衫": 45,
+      "POLO衫": 55,
+      "毛衣": 70,
+      "T恤": 45,
+      "西裝褲": 90,
+      "牛仔褲": 70
+    }
+  },
+  "storeTime": {
+    "weekdays": [
+      {
+        "day": "一",
+        "open": "08:00",
+        "close": "20:00"
+      },
+      {
+        "day": "二",
+        "open": "08:00",
+        "close": "20:00"
+      },
+      {
+        "day": "三",
+        "open": "08:00",
+        "close": "20:00"
+      },
+      {
+        "day": "四",
+        "open": "08:00",
+        "close": "20:00"
+      },
+      {
+        "day": "五",
+        "open": "08:00",
+        "close": "20:00"
+      },
+      {
+        "day": "六",
+        "open": "08:00",
+        "close": "20:00"
+      },
+      {
+        "day": "日",
+        "open": "公休",
+        "close": "公休"
+      }
+    ],
+    "special": []
+  }
+}

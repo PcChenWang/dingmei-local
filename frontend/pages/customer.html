@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>定美洗衣店 - 顧客端</title>
+  <style>
+    .section-content { display: none; margin-top: 10px; }
+    .active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border:1px solid #ccc; padding:5px; }
+    .bigButton {
+      width:150px; height:50px;
+      font-size:16px; margin:10px;
+    }
+    /* 右上角時鐘 */
+    #realtimeClock {
+      float: right;
+      font-size: 18px; /* 放大 */
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- 頂端顯示顧客資訊 + 右上角時鐘 -->
+  <div style="border-bottom:1px solid #999; padding:10px;">
+    <span id="customerName">顧客：---</span>
+    &nbsp;&nbsp;&nbsp;
+    <span id="registeredDate">註冊日期：---</span>
+    &nbsp;&nbsp;&nbsp;
+    <span id="customerPhone">連絡電話：---</span>
+    <span id="realtimeClock"></span>
+  </div>
+
+  <!-- (A) 首頁 -->
+  <section id="homeSection" class="section-content">
+    <h2>顧客首頁</h2>
+    <div style="margin-top:20px;">
+      <button class="bigButton" id="btnContact">與店家聯繫</button>
+      <button class="bigButton" id="btnStoreTime">店家營業時間</button>
+      <button class="bigButton" id="btnOrderStatus">送洗狀態查詢</button>
+      <button class="bigButton" id="btnHistory">歷史資料</button>
+      <button class="bigButton" id="btnEditProfile">修改基本資料</button>
+      <button class="bigButton" id="btnLogout">登出</button>
+    </div>
+  </section>
+
+  <!-- (B) 與店家聯繫 -->
+  <section id="contactSection" class="section-content">
+    <h2>與店家聯繫</h2>
+    <div id="contactInfo"></div>
+    <div style="margin-top:20px;">
+      <button id="contactHomeBtn">回首頁</button>
+      <button id="contactLogoutBtn">登出</button>
+    </div>
+  </section>
+
+  <!-- (C) 店家營業時間 -->
+  <section id="timeSection" class="section-content">
+    <h2>店家營業時間</h2>
+    <div id="timeInfo"></div>
+    <div style="margin-top:20px;">
+      <button id="timeHomeBtn">回首頁</button>
+      <button id="timeLogoutBtn">登出</button>
+    </div>
+  </section>
+
+  <!-- (D) 送洗狀態查詢 -->
+  <section id="orderStatusSection" class="section-content">
+    <h2>送洗狀態查詢</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>送洗時間</th>
+          <th>送洗內容</th>
+          <th>價格</th>
+          <th>是否完成</th>
+        </tr>
+      </thead>
+      <tbody id="orderStatusTbody"></tbody>
+    </table>
+    <div style="margin-top:20px;">
+      <button id="orderHomeBtn">回首頁</button>
+      <button id="orderLogoutBtn">登出</button>
+    </div>
+  </section>
+
+  <!-- (E) 歷史資料 -->
+  <section id="historySection" class="section-content">
+    <h2>歷史資料</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>送洗時間</th>
+          <th>送洗內容</th>
+          <th>價格</th>
+          <th>領取時間</th>
+        </tr>
+      </thead>
+      <tbody id="historyTbody"></tbody>
+    </table>
+    <div style="margin-top:20px;">
+      <button id="historyHomeBtn">回首頁</button>
+      <button id="historyLogoutBtn">登出</button>
+    </div>
+  </section>
+
+  <!-- (F) 修改基本資料 -->
+  <section id="editProfileSection" class="section-content">
+    <h2>修改基本資料</h2>
+    <div>
+      <label>手機：<input type="text" id="editPhone"/></label><br/><br/>
+      <label>LINE ID：<input type="text" id="editLineId"/></label><br/><br/>
+      <button id="saveProfileBtn">儲存</button>
+    </div>
+    <div style="margin-top:20px;">
+      <button id="editHomeBtn">回首頁</button>
+      <button id="editLogoutBtn">登出</button>
+    </div>
+  </section>
+
+  <script>
+    let userId= null; // 由 login.html -> localStorage.setItem('userId',xxx)
+
+    // 檢查 localStorage
+    (function initCheck(){
+      const role= localStorage.getItem('role');
+      if(!role || role!=='customer'){
+        alert('您不是顧客，無法使用此頁');
+        window.location.href='./login.html';
+      }
+      userId= parseInt(localStorage.getItem('userId'));
+      if(!userId){
+        alert('缺少 userId，請重新登入');
+        window.location.href='./login.html';
+      }
+    })();
+
+    // 切換區塊
+    function showSection(secId){
+      document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+      document.getElementById(secId).classList.add('active');
+    }
+
+    // 右上角時鐘(加大並改格式)
+    function updateClock(){
+      const now= new Date();
+      const y= now.getFullYear();
+      const mon= String(now.getMonth()+1).padStart(2,'0');
+      const d= String(now.getDate()).padStart(2,'0');
+      let hh24= now.getHours();
+      let mm= String(now.getMinutes()).padStart(2,'0');
+      let ss= String(now.getSeconds()).padStart(2,'0');
+      let ampm= (hh24>=12)? '下午':'上午';
+      let hh12= hh24 % 12; 
+      if(hh12===0) hh12=12;
+
+      const datePart= `${y}/${mon}/${d}`;
+      const time12= `${ampm}${hh12}點${mm}分${ss}秒`;
+      const time24= `(${String(hh24).padStart(2,'0')}:${mm}:${ss})`;
+      document.getElementById('realtimeClock').textContent= `${datePart}  ${time12} ${time24}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // YYYY/MM/DD
+    function shortDate(isoString){
+      if(!isoString) return '';
+      const dt= new Date(isoString);
+      if(isNaN(dt.getTime())) return '';
+      const y= dt.getFullYear();
+      const m= String(dt.getMonth()+1).padStart(2,'0');
+      const d= String(dt.getDate()).padStart(2,'0');
+      return `${y}/${m}/${d}`;
+    }
+
+    // 切頁面按鈕
+    document.getElementById('btnContact').addEventListener('click', ()=> { loadContact(); showSection('contactSection'); });
+    document.getElementById('btnStoreTime').addEventListener('click', ()=> { loadStoreTime(); showSection('timeSection'); });
+    document.getElementById('btnOrderStatus').addEventListener('click', ()=> { loadOrdersInProgress(); showSection('orderStatusSection'); });
+    document.getElementById('btnHistory').addEventListener('click', ()=> { loadHistory(); showSection('historySection'); });
+    document.getElementById('btnEditProfile').addEventListener('click', ()=> { showSection('editProfileSection'); });
+    document.getElementById('btnLogout').addEventListener('click', logout);
+
+    document.getElementById('contactHomeBtn').addEventListener('click', ()=> showSection('homeSection'));
+    document.getElementById('contactLogoutBtn').addEventListener('click', logout);
+    document.getElementById('timeHomeBtn').addEventListener('click', ()=> showSection('homeSection'));
+    document.getElementById('timeLogoutBtn').addEventListener('click', logout);
+    document.getElementById('orderHomeBtn').addEventListener('click', ()=> showSection('homeSection'));
+    document.getElementById('orderLogoutBtn').addEventListener('click', logout);
+    document.getElementById('historyHomeBtn').addEventListener('click', ()=> showSection('homeSection'));
+    document.getElementById('historyLogoutBtn').addEventListener('click', logout);
+    document.getElementById('editHomeBtn').addEventListener('click', ()=> showSection('homeSection'));
+    document.getElementById('editLogoutBtn').addEventListener('click', logout);
+
+    function logout(){
+      localStorage.clear();
+      window.location.href='./login.html';
+    }
+
+    // 載入顧客資訊 => 顯示頂端
+    async function loadCustomerInfo(){
+      const res= await fetch(`http://localhost:3000/api/customer/${userId}`);
+      const data= await res.json();
+      if(!data.success) return;
+      const u= data.user;
+      document.getElementById('customerName').textContent= `顧客：${u.username}`;
+      document.getElementById('registeredDate').textContent= `註冊日期：${u.registeredDate}`;
+      document.getElementById('customerPhone').textContent= `連絡電話：${u.phone}`;
+      // 預設填寫
+      document.getElementById('editPhone').value= u.phone;
+      document.getElementById('editLineId').value= u.lineId||'';
+    }
+
+    // (B) 與店家聯繫 => /api/store/contact
+    async function loadContact(){
+      const res= await fetch('http://localhost:3000/api/store/contact');
+      const data= await res.json();
+      if(!data.success) return;
+      const info= data.data;
+      const div= document.getElementById('contactInfo');
+      div.innerHTML=`
+        <p>Line ID：${info.lineId}</p>
+        <p>店家電話：${info.storePhone}</p>
+        <p>備用連絡電話：${info.backupPhone}</p>
+        <p>店家地址：${info.address}</p>
+      `;
+    }
+
+    // (C) 店家營業時間 => /api/store/time
+    async function loadStoreTime(){
+      const res= await fetch('http://localhost:3000/api/store/time');
+      const data= await res.json();
+      if(!data.success) return;
+      const { weekdays, special }= data.data;
+      let html= '<p>營業時間：</p><ul>';
+      weekdays.forEach(w=>{
+        html+= `<li>${w.day}：${w.open} ~ ${w.close}</li>`;
+      });
+      html+='</ul><hr/><p>特殊調整：</p><ul>';
+      special.forEach(sp=>{
+        html+= `<li>${sp.startDate} ~ ${sp.endDate}：${sp.open} ~ ${sp.close}</li>`;
+      });
+      html+='</ul>';
+      document.getElementById('timeInfo').innerHTML= html;
+    }
+
+    // (D) 送洗狀態查詢 => /api/customer/:userId/ordersInProgress
+    async function loadOrdersInProgress(){
+      const res= await fetch(`http://localhost:3000/api/customer/${userId}/ordersInProgress`);
+      const data= await res.json();
+      if(!data.success) return;
+      const tbody= document.getElementById('orderStatusTbody');
+      tbody.innerHTML='';
+      data.data.forEach(o=>{
+        // o.date => shortDate
+        const tr= document.createElement('tr');
+        tr.innerHTML=`
+          <td>${shortDate(o.date)}</td>
+          <td>${o.itemsDesc}</td>
+          <td>${o.price}</td>
+          <td>${o.finishSymbol}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // (E) 歷史資料 => /api/customer/:userId/ordersHistory
+    async function loadHistory(){
+      const res= await fetch(`http://localhost:3000/api/customer/${userId}/ordersHistory`);
+      const data= await res.json();
+      if(!data.success) return;
+      const tbody= document.getElementById('historyTbody');
+      tbody.innerHTML='';
+      data.data.forEach(o=>{
+        const tr= document.createElement('tr');
+        tr.innerHTML=`
+          <td>${shortDate(o.date)}</td>
+          <td>${o.itemsDesc}</td>
+          <td>${o.price}</td>
+          <td>${shortDate(o.pickTime || o.pickupTime)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // (F) 修改基本資料 => /api/customer/update
+    document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
+      const phone= document.getElementById('editPhone').value.trim();
+      const lineId= document.getElementById('editLineId').value.trim();
+      const bodyObj= { userId, phone, lineId };
+      const res= await fetch('http://localhost:3000/api/customer/update',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(bodyObj)
+      });
+      const d= await res.json();
+      alert(d.message);
+      if(d.success){
+        loadCustomerInfo();
+        showSection('homeSection');
+      }
+    });
+
+    // 初始化
+    function init(){
+      loadCustomerInfo();
+      showSection('homeSection');
+    }
+    init();
+  </script>
+</body>
+</html>

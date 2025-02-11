@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>定美洗衣店 - 店家後台</title>
+  <style>
+    .tab-content {
+      display: none;
+      margin-top: 20px;
+    }
+    .active {
+      display: block;
+    }
+    .sub-tab-content {
+      display: none;
+      margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+    /* 右上角時鐘放大 + 自訂格式 */
+    #realtimeClock {
+      float: right;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    /* 自動搜尋結果框 */
+    #searchResults {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #888;
+      padding: 5px;
+      display: none;
+      z-index: 999;
+    }
+    .searchItem {
+      cursor: pointer;
+      padding: 3px 5px;
+    }
+    .searchItem:hover {
+      background-color: #cceeff;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    定美洗衣店 - 店家後台
+    <span id="realtimeClock"></span>
+  </h1>
+
+  <!-- 主分頁按鈕 -->
+  <nav>
+    <button class="tabBtn" data-target="customerTab">顧客資料</button>
+    <button class="tabBtn" data-target="createOrderTab">清洗登記</button>
+    <button class="tabBtn" data-target="washingTab">清洗進度</button>
+    <button class="tabBtn" data-target="unpickedTab">完成清洗</button>
+    <button class="tabBtn" data-target="historyTab">歷史紀錄</button>
+    <button class="tabBtn" data-target="settingsTab">設定</button>
+  </nav>
+
+  <!-- 1. 顧客資料 (含搜尋) -->
+  <section id="customerTab" class="tab-content">
+    <h2>顧客資料</h2>
+    <div style="margin-bottom:10px;">
+      <label>搜尋：<input type="text" id="customerSearch"/></label>
+    </div>
+    <table id="customersTable">
+      <thead>
+        <tr>
+          <th>選取</th>
+          <th>顧客ID</th>
+          <th>顧客姓名</th>
+          <th>連絡電話</th>
+          <th>LINE ID</th>
+          <th>送洗次數</th>
+          <th>最後送洗時間</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>新增顧客</h3>
+    <div>
+      <label>顧客姓名：
+        <input type="text" id="addCusName" />
+      </label>
+      <label>連絡電話：
+        <input type="text" id="addCusPhone" />
+      </label>
+      <label>LINE ID：
+        <input type="text" id="addCusLine" />
+      </label>
+      <button id="addCustomerBtn">新增</button>
+    </div>
+    <button id="delCustomerBtn">刪除勾選顧客</button>
+  </section>
+
+  <!-- 2. 清洗登記 (含自動搜尋顧客) -->
+  <section id="createOrderTab" class="tab-content">
+    <h2>清洗登記</h2>
+    <div style="position: relative;">
+      <label>輸入顧客姓名或電話：
+        <input type="text" id="usernameOrPhone" autocomplete="off" />
+      </label>
+      <!-- 顧客自動搜尋結果框 -->
+      <div id="searchResults"></div>
+    </div>
+    <label>是否為常客：<input type="checkbox" id="isFrequent" /></label>
+
+    <!-- 分類按鈕 & 清洗品項表格 -->
+    <div id="categoryBtns" style="margin-top:10px;"></div>
+    <table id="categoryItemsTable">
+      <thead>
+        <tr>
+          <th>名稱</th>
+          <th>數量</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div style="margin-top:10px;">
+      <p>特殊收費：
+        <input type="number" id="extraFee" value="0"/>
+      </p>
+      <p>合計件數：<span id="totalQty">0</span></p>
+      <p>預估金額：<span id="calculatedPrice">0</span></p>
+      <p>此次送洗：
+        <input type="text" id="orderSummary" readonly style="width:900px;" />
+      </p>
+    </div>
+
+    <button id="createOrderBtn">建立訂單</button>
+  </section>
+
+  <!-- 3. 清洗進度 -->
+  <section id="washingTab" class="tab-content">
+    <h2>清洗進度</h2>
+    <table id="washingTable">
+      <thead>
+        <tr>
+          <th>選取</th>
+          <th>訂單ID</th>
+          <th>顧客姓名</th>
+          <th>送洗內容</th>
+          <th>送洗時間</th>
+          <th>連絡電話</th>
+          <th>LINE ID</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button id="finishWashingBtn">完成清洗</button>
+  </section>
+
+  <!-- 4. 完成清洗 -->
+  <section id="unpickedTab" class="tab-content">
+    <h2>完成清洗</h2>
+    <table id="unpickedTable">
+      <thead>
+        <tr>
+          <th>選取</th>
+          <th>訂單ID</th>
+          <th>顧客姓名</th>
+          <th>送洗內容</th>
+          <th>送洗時間</th>
+          <th>完成清洗時間</th>
+          <th>連絡電話</th>
+          <th>LINE ID</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button id="notifyPickupBtn">通知領取</button>
+    <button id="completePickupBtn">已領取</button>
+  </section>
+
+  <!-- 5. 歷史紀錄 (搜尋 + checkbox + 刪除) -->
+  <section id="historyTab" class="tab-content">
+    <h2>歷史紀錄</h2>
+    <div style="margin-bottom:10px;">
+      <input type="text" id="historySearchInput" placeholder="搜尋關鍵字"/>
+      <button id="historyDeleteBtn">刪除</button>
+    </div>
+    <table id="historyTable">
+      <thead>
+        <tr>
+          <th>選取</th>
+          <th>訂單ID</th>
+          <th>顧客姓名</th>
+          <th>送洗內容</th>
+          <th>送洗時間</th>
+          <th>價格</th>
+          <th>領取時間</th>
+          <th>連絡電話</th>
+          <th>LINE ID</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- 6. 設定 (價格設定 / 營業時間設定) -->
+  <section id="settingsTab" class="tab-content">
+    <h2>設定</h2>
+    <div>
+      <button class="subTabBtn" data-target="priceSettings">價格設定</button>
+      <button class="subTabBtn" data-target="timeSettings">營業時間設定</button>
+    </div>
+
+    <div id="priceSettings" class="sub-tab-content">
+      <h3>價格設定</h3>
+      <select id="priceType">
+        <option value="normal">普通客</option>
+        <option value="frequent">常客</option>
+      </select>
+      <div id="priceList"></div>
+    </div>
+
+    <div id="timeSettings" class="sub-tab-content">
+      <h3>營業時間設定</h3>
+      <div id="weekdaysArea"></div>
+      <hr/>
+      <h4>特殊調整</h4>
+      <div id="specialArea"></div>
+      <button id="saveTimeBtn">儲存</button>
+    </div>
+  </section>
+
+  <button id="logoutBtn" style="margin-top:30px;">登出</button>
+
+  <script>
+    /* =========== 全域變數/設定 =========== */
+    let baseURL='';
+    let lineApiConfig=null;     // lineApiConfig.json
+    let notifyTemplate=null;    // notifyTemplate.json
+    let allCustomers=[];        // 顧客清單 (搜尋/顯示用)
+    let selectedItems={};       // 清洗登記已選品項
+
+    let categoriesData={};      // 從後端拿
+    let priceTableNormal={};
+    let priceTableFrequent={};
+    let historyList=[];         // 歷史紀錄
+
+    /* =========== 1. 讀取 config.json / lineApiConfig.json / notifyTemplate.json =========== */
+    async function loadConfig(){
+      // config.json => { "apiBase": "http://localhost:3000" }
+      const cRes= await fetch('config.json');
+      const cJson= await cRes.json();
+      baseURL= cJson.apiBase;
+
+      // lineApiConfig.json => { "channelAccessToken":"XXX", "channelSecret":"YYY" }
+      const lRes= await fetch('lineApiConfig.json');
+      lineApiConfig= await lRes.json();
+
+      // notifyTemplate.json => { "pickupMsg":"您好 您於XXXX..." }
+      const tRes= await fetch('notifyTemplate.json');
+      notifyTemplate= await tRes.json();
+    }
+
+    /* =========== 2. 頁籤切換 =========== */
+    const tabBtns= document.querySelectorAll('.tabBtn');
+    const tabContents= document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        tabContents.forEach(tc=> tc.classList.remove('active'));
+        const tar= document.getElementById(btn.dataset.target);
+        if(tar) tar.classList.add('active');
+      });
+    });
+    document.getElementById('customerTab').classList.add('active');
+
+    // 子頁籤
+    const subTabBtns= document.querySelectorAll('.subTabBtn');
+    subTabBtns.forEach(sbtn=>{
+      sbtn.addEventListener('click', ()=>{
+        document.querySelectorAll('.sub-tab-content').forEach(st=> st.style.display='none');
+        const tdiv= document.getElementById(sbtn.dataset.target);
+        if(tdiv) tdiv.style.display='block';
+      });
+    });
+
+    /* =========== 3. 右上角時鐘 =========== */
+    function updateClock(){
+      const now= new Date();
+      const y= now.getFullYear();
+      const mon= String(now.getMonth()+1).padStart(2,'0');
+      const d= String(now.getDate()).padStart(2,'0');
+      let hh24= now.getHours();
+      let mm= String(now.getMinutes()).padStart(2,'0');
+      let ss= String(now.getSeconds()).padStart(2,'0');
+      let ampm= (hh24>=12)? '下午':'上午';
+      let hh12= hh24 % 12; 
+      if(hh12===0) hh12=12;
+
+      const datePart= `${y}/${mon}/${d}`;
+      const time12= `${ampm}${hh12}點${mm}分${ss}秒`;
+      const time24= `(${String(hh24).padStart(2,'0')}:${mm}:${ss})`;
+      const clockEl= document.getElementById('realtimeClock');
+      if(clockEl){
+        clockEl.textContent= `${datePart}  ${time12} ${time24}`;
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* =========== 4. 短日期顯示 (YYYY/MM/DD) =========== */
+    function shortDate(isoString){
+      if(!isoString) return '';
+      const dt= new Date(isoString);
+      if(isNaN(dt.getTime())) return '';
+      const y= dt.getFullYear();
+      const m= String(dt.getMonth()+1).padStart(2,'0');
+      const d= String(dt.getDate()).padStart(2,'0');
+      return `${y}/${m}/${d}`;
+    }
+
+    /* =========== 5. 顧客資料 (含搜尋) =========== */
+    async function loadCustomers(){
+      try {
+        const res= await fetch(`${baseURL}/api/store/customers`);
+        const data= await res.json();
+        if(!data.success) return;
+        allCustomers= data.data;  // 給搜尋功能
+        renderCustomers();
+      } catch(err){
+        console.error('loadCustomers error:', err);
+      }
+    }
+    function renderCustomers(){
+      const kw= document.getElementById('customerSearch').value.trim().toLowerCase();
+      let filtered= allCustomers;
+      if(kw){
+        filtered= allCustomers.filter(c=>{
+          const str= (c.username + c.phone + c.lineId).toLowerCase();
+          return str.includes(kw);
+        });
+      }
+      const tbody= document.querySelector('#customersTable tbody');
+      tbody.innerHTML='';
+      filtered.forEach(c=>{
+        const tr= document.createElement('tr');
+        tr.innerHTML=`
+          <td><input type="checkbox" class="customerChk" data-id="${c.id}"></td>
+          <td>${c.id}</td>
+          <td>${c.username}</td>
+          <td>${c.phone}</td>
+          <td>${c.lineId}</td>
+          <td>${c.sendTimes}</td>
+          <td>${c.lastDate}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    document.getElementById('customerSearch').addEventListener('input', renderCustomers);
+    document.getElementById('addCustomerBtn').addEventListener('click', async ()=>{
+      const name= document.getElementById('addCusName').value.trim();
+      const phone= document.getElementById('addCusPhone').value.trim();
+      const lineId= document.getElementById('addCusLine').value.trim();
+      if(!name){
+        alert('請輸入顧客姓名');
+        return;
+      }
+      try {
+        const res= await fetch(`${baseURL}/api/store/addCustomer`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ username:name, phone, lineId })
+        });
+        const d= await res.json();
+        alert(d.message);
+        if(d.success){
+          document.getElementById('addCusName').value='';
+          document.getElementById('addCusPhone').value='';
+          document.getElementById('addCusLine').value='';
+          loadCustomers();
+        }
+      } catch(err){
+        console.error('addCustomer error:', err);
+      }
+    });
+    document.getElementById('delCustomerBtn').addEventListener('click', async ()=>{
+      const chks= document.querySelectorAll('.customerChk:checked');
+      if(!chks.length){
+        alert('請勾選要刪除的顧客');
+        return;
+      }
+      if(!confirm('確定刪除這些顧客？')) return;
+      const userIds= Array.from(chks).map(c=> parseInt(c.dataset.id));
+      try {
+        const res= await fetch(`${baseURL}/api/store/deleteCustomers`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ userIds })
+        });
+        const d= await res.json();
+        alert(d.message);
+        if(d.success) loadCustomers();
+      } catch(err){
+        console.error('deleteCustomers error:', err);
+      }
+    });
+
+    /* =========== 6. 清洗登記 (含搜尋顧客) =========== */
+    async function loadCategories(){
+      try {
+        const res= await fetch(`${baseURL}/api/store/categories`);
+        const data= await res.json();
+        if(data.success){
+          categoriesData= data.data;
+          renderCategoryButtons();
+        }
+      } catch(err){
+        console.error('loadCategories error:', err);
+      }
+    }
+    function renderCategoryButtons(){
+      const catDiv= document.getElementById('categoryBtns');
+      catDiv.innerHTML='';
+      Object.keys(categoriesData).forEach(cate=>{
+        const btn= document.createElement('button');
+        btn.textContent= cate;
+        btn.addEventListener('click', ()=> renderCategoryItems(cate));
+        catDiv.appendChild(btn);
+      });
+    }
+    const categoryItemsTableBody= document.querySelector('#categoryItemsTable tbody');
+    function renderCategoryItems(cate){
+      categoryItemsTableBody.innerHTML='';
+      const items= categoriesData[cate]||[];
+      items.forEach(iName=>{
+        const qty= selectedItems[iName]||0;
+        const tr= document.createElement('tr');
+        tr.innerHTML=`
+          <td>${iName}</td>
+          <td><input type="number" min="0" value="${qty}" data-item="${iName}" /></td>
+        `;
+        categoryItemsTableBody.appendChild(tr);
+      });
+      // input => calcTotal
+      categoryItemsTableBody.querySelectorAll('input[data-item]').forEach(ip=>{
+        ip.addEventListener('input', ()=>{
+          const val= parseInt(ip.value)||0;
+          selectedItems[ip.dataset.item]= val;
+          calcTotal();
+        });
+      });
+      calcTotal();
+    }
+    function calcTotal(){
+      const isFrequent= document.getElementById('isFrequent').checked;
+      const extraFee= parseInt(document.getElementById('extraFee').value)||0;
+      const currentPriceTable= isFrequent? priceTableFrequent: priceTableNormal;
+      let totalQty=0, totalPrice=0;
+      let summaryStr='';
+      for(let itemName in selectedItems){
+        const qty= selectedItems[itemName];
+        if(qty>0){
+          totalQty+= qty;
+          if(currentPriceTable[itemName]){
+            totalPrice+= currentPriceTable[itemName]* qty;
+          }
+          summaryStr+= `${itemName}${qty}件 `;
+        }
+      }
+      totalPrice+= extraFee;
+      document.getElementById('totalQty').textContent= totalQty;
+      document.getElementById('calculatedPrice').textContent= totalPrice;
+      document.getElementById('orderSummary').value= summaryStr.trim();
+    }
+    document.getElementById('isFrequent').addEventListener('change', calcTotal);
+    document.getElementById('extraFee').addEventListener('input', calcTotal);
+
+    document.getElementById('createOrderBtn').addEventListener('click', async ()=>{
+      calcTotal();
+      const usernameOrPhone= document.getElementById('usernameOrPhone').value.trim();
+      const isFrequent= document.getElementById('isFrequent').checked;
+      const extraFee= parseInt(document.getElementById('extraFee').value)||0;
+      const itemsObj={};
+      for(let k in selectedItems){
+        if(selectedItems[k]>0){
+          itemsObj[k]= selectedItems[k];
+        }
+      }
+      try {
+        const res= await fetch(`${baseURL}/api/store/createOrder`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ usernameOrPhone, isFrequent, items:itemsObj, extraFee })
+        });
+        const d= await res.json();
+        if(d.success){
+          alert('訂單建立成功');
+          document.getElementById('usernameOrPhone').value='';
+          document.getElementById('isFrequent').checked=false;
+          document.getElementById('extraFee').value='0';
+          selectedItems={};
+          categoryItemsTableBody.innerHTML='';
+          document.getElementById('totalQty').textContent='0';
+          document.getElementById('calculatedPrice').textContent='0';
+          document.getElementById('orderSummary').value='';
+          loadWashing();
+        } else {
+          alert(d.message||'建立訂單失敗');
+        }
+      } catch(err){
+        console.error('createOrder error:', err);
+      }
+    });
+
+    // 自動搜尋顧客
+    const inputUserPhone= document.getElementById('usernameOrPhone');
+    const resultDiv= document.getElementById('searchResults');
+    inputUserPhone.addEventListener('input', ()=>{
+      const keyword= inputUserPhone.value.trim().toLowerCase();
+      if(!keyword){
+        resultDiv.style.display='none';
+        return;
+      }
+      // 依 allCustomers 過濾
+      const matched= allCustomers.filter(c=>{
+        const full= (c.username+(c.phone||'')).toLowerCase();
+        return full.includes(keyword);
+      });
+      if(!matched.length){
+        resultDiv.style.display='none';
+        return;
+      }
+      resultDiv.innerHTML= matched.map(m=>
+        `<div class="searchItem" data-username="${m.username}">
+           ${m.username} / ${m.phone}
+         </div>`
+      ).join('');
+      resultDiv.style.display='block';
+      // dblclick => 帶回
+      const items= resultDiv.querySelectorAll('.searchItem');
+      items.forEach(it=>{
+        it.addEventListener('dblclick', e=>{
+          const uname= it.dataset.username;
+          inputUserPhone.value= uname;
+          resultDiv.style.display='none';
+        });
+      });
+    });
+
+    /* =========== 7. 洗衣進度 =========== */
+    async function loadWashing(){
+      try{
+        const res= await fetch(`${baseURL}/api/store/washing`);
+        const data= await res.json();
+        if(!data.success) return;
+        const tbody= document.querySelector('#washingTable tbody');
+        tbody.innerHTML= '';
+        data.data.forEach(o=>{
+          const tr= document.createElement('tr');
+          tr.innerHTML=`
+            <td><input type="checkbox" class="washingChk" data-id="${o.orderId}"></td>
+            <td>${o.orderId}</td>
+            <td>${o.customerName}</td>
+            <td>${o.itemsDesc}</td>
+            <td>${shortDate(o.date)}</td>
+            <td>${o.phone||''}</td>
+            <td>${o.lineId||''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch(err){
+        console.error('loadWashing error:', err);
+      }
+    }
+    document.getElementById('finishWashingBtn').addEventListener('click', async ()=>{
+      const chks= document.querySelectorAll('.washingChk:checked');
+      if(!chks.length){
+        alert('請勾選要完成清洗的訂單');
+        return;
+      }
+      if(!confirm('確定將這些訂單改為「完成清洗」？')) return;
+      const orderIds= Array.from(chks).map(c=> parseInt(c.dataset.id));
+      try{
+        const res= await fetch(`${baseURL}/api/store/finishWashing`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ orderIds })
+        });
+        const d= await res.json();
+        alert(d.message);
+        if(d.success){
+          loadWashing();
+          loadUnpicked();
+        }
+      } catch(err){
+        console.error('finishWashing error:', err);
+      }
+    });
+
+    /* =========== 8. 完成清洗 (unpicked) + 通知領取 =========== */
+    async function loadUnpicked(){
+      try{
+        const res= await fetch(`${baseURL}/api/store/unpicked`);
+        const data= await res.json();
+        if(!data.success) return;
+        const tbody= document.querySelector('#unpickedTable tbody');
+        tbody.innerHTML= '';
+        data.data.forEach(o=>{
+          const tr= document.createElement('tr');
+          tr.innerHTML=`
+            <td><input type="checkbox" class="unpickedChk" data-id="${o.orderId}"></td>
+            <td>${o.orderId}</td>
+            <td>${o.customerName}</td>
+            <td>${o.itemsDesc}</td>
+            <td>${shortDate(o.date)}</td>
+            <td>${shortDate(o.washedTime)}</td>
+            <td>${o.phone||''}</td>
+            <td>${o.lineId||''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch(err){
+        console.error('loadUnpicked error:', err);
+      }
+    }
+    document.getElementById('notifyPickupBtn').addEventListener('click', async ()=>{
+      const chks= document.querySelectorAll('.unpickedChk:checked');
+      if(!chks.length){
+        alert('請勾選要通知的訂單');
+        return;
+      }
+      if(!confirm('確定要發送「通知領取」訊息給這些訂單嗎？')) return;
+      const orderIds= Array.from(chks).map(c=> parseInt(c.dataset.id));
+      // 呼叫後端 /api/store/notifyPickup
+      try {
+        const res= await fetch(`${baseURL}/api/store/notifyPickup`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ orderIds })
+        });
+        const d= await res.json();
+        if(d.success){
+          alert('已通知');
+        } else {
+          alert(d.message||'通知失敗');
+        }
+      } catch(err){
+        console.error('notifyPickup error:', err);
+      }
+    });
+    document.getElementById('completePickupBtn').addEventListener('click', async ()=>{
+      const chks= document.querySelectorAll('.unpickedChk:checked');
+      if(!chks.length){
+        alert('請勾選要完成領取的訂單');
+        return;
+      }
+      if(!confirm('確定將這些訂單改為「完成領取」？')) return;
+      const orderIds= Array.from(chks).map(c=> parseInt(c.dataset.id));
+      try{
+        const res= await fetch(`${baseURL}/api/store/completePickup`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ orderIds })
+        });
+        const d= await res.json();
+        alert(d.message);
+        if(d.success){
+          loadUnpicked();
+          loadHistory();
+        }
+      } catch(err){
+        console.error('completePickup error:', err);
+      }
+    });
+
+    /* =========== 9. 歷史紀錄 (搜尋 + checkbox + 刪除) =========== */
+    async function loadHistory(){
+      try {
+        const res= await fetch(`${baseURL}/api/store/history`);
+        const data= await res.json();
+        if(!data.success) return;
+        historyList= data.data;
+        renderHistory();
+      } catch(err){
+        console.error('loadHistory error:', err);
+      }
+    }
+    function renderHistory(){
+      const kw= document.getElementById('historySearchInput').value.trim().toLowerCase();
+      let filtered= historyList;
+      if(kw){
+        filtered= historyList.filter(o=>{
+          const str= (o.customerName + o.itemsDesc + o.phone + o.lineId + o.date + o.orderId).toLowerCase();
+          return str.includes(kw);
+        });
+      }
+      const tbody= document.querySelector('#historyTable tbody');
+      tbody.innerHTML='';
+      filtered.forEach(o=>{
+        const tr= document.createElement('tr');
+        tr.innerHTML=`
+          <td><input type="checkbox" class="historyChk" data-id="${o.orderId}"></td>
+          <td>${o.orderId}</td>
+          <td>${o.customerName}</td>
+          <td>${o.itemsDesc}</td>
+          <td>${shortDate(o.date)}</td>
+          <td>${o.totalPrice||0}</td>
+          <td>${shortDate(o.pickTime)}</td>
+          <td>${o.phone||''}</td>
+          <td>${o.lineId||''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    document.getElementById('historySearchInput').addEventListener('input', renderHistory);
+    document.getElementById('historyDeleteBtn').addEventListener('click', ()=>{
+      const chks= document.querySelectorAll('.historyChk:checked');
+      if(!chks.length){
+        alert('請勾選要刪除的紀錄');
+        return;
+      }
+      if(!confirm('確定刪除? '))return;
+      const ids= Array.from(chks).map(c=> parseInt(c.dataset.id));
+      // 前端刪除
+      historyList= historyList.filter(o=> !ids.includes(o.orderId));
+      renderHistory();
+      alert('已刪除');
+      // 若要後端刪 => fetch('/api/store/deleteHistoryOrders', ...)
+    });
+
+    /* =========== 10. 設定: 價格 & 營業時間 =========== */
+    document.getElementById('priceType').addEventListener('change', fillPriceInputs);
+
+    async function loadPrices(){
+      try {
+        const res= await fetch(`${baseURL}/api/store/prices`);
+        const data= await res.json();
+        if(!data.success) return;
+        priceTableNormal= data.data.normal;
+        priceTableFrequent= data.data.frequent;
+        fillPriceInputs();
+        calcTotal(); 
+      } catch(err){
+        console.error('loadPrices error:', err);
+      }
+    }
+    function fillPriceInputs(){
+      const type= document.getElementById('priceType').value;
+      const curr= (type==='frequent') ? priceTableFrequent : priceTableNormal;
+      const plDiv= document.getElementById('priceList');
+      plDiv.innerHTML='';
+      for(let k in curr){
+        const row= document.createElement('div');
+        row.innerHTML=`
+          <label>${k}:
+            <input type="number" value="${curr[k]}" style="width:60px;" data-item="${k}"/>
+          </label>
+          <button data-item="${k}">更新</button>
+        `;
+        plDiv.appendChild(row);
+      }
+      // 綁定更新
+      plDiv.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const itemKey= btn.dataset.item;
+          const inputEl= btn.parentElement.querySelector('input');
+          const val= parseInt(inputEl.value)||0;
+          try{
+            const r= await fetch(`${baseURL}/api/store/prices`,{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ type, key:itemKey, value:val })
+            });
+            const rd= await r.json();
+            alert(rd.message);
+            if(rd.success){
+              if(type==='frequent'){
+                priceTableFrequent[itemKey]= val;
+              } else {
+                priceTableNormal[itemKey]= val;
+              }
+              calcTotal();
+            }
+          } catch(err){
+            console.error('updatePrice error:', err);
+          }
+        });
+      });
+    }
+
+    async function loadStoreTime(){
+      try {
+        const res= await fetch(`${baseURL}/api/store/time`);
+        const data= await res.json();
+        if(!data.success) return;
+        const { weekdays, special }= data.data;
+        const weekdaysArea= document.getElementById('weekdaysArea');
+        weekdaysArea.innerHTML='';
+        weekdays.forEach((dayObj, idx)=>{
+          const row= document.createElement('div');
+          row.innerHTML=`
+            <label>${dayObj.day}：
+              <input type="text" value="${dayObj.open}" data-weekday="${idx}" data-field="open" style="width:60px;"/>
+              ~
+              <input type="text" value="${dayObj.close}" data-weekday="${idx}" data-field="close" style="width:60px;"/>
+            </label>
+          `;
+          weekdaysArea.appendChild(row);
+        });
+        const specialArea= document.getElementById('specialArea');
+        specialArea.innerHTML='';
+        special.forEach((sp, sidx)=>{
+          const srow= document.createElement('div');
+          srow.innerHTML=`
+            <label>起始日：
+              <input type="text" value="${sp.startDate}" data-special="${sidx}" data-field="startDate" style="width:100px;"/>
+            </label>
+            <label>結束日：
+              <input type="text" value="${sp.endDate}" data-special="${sidx}" data-field="endDate" style="width:100px;"/>
+            </label>
+            <label>營業：
+              <input type="text" value="${sp.open}" data-special="${sidx}" data-field="open" style="width:60px;"/>
+            </label>
+            <label>結束：
+              <input type="text" value="${sp.close}" data-special="${sidx}" data-field="close" style="width:60px;"/>
+            </label>
+          `;
+          specialArea.appendChild(srow);
+        });
+      } catch(err){
+        console.error('loadStoreTime error:', err);
+      }
+    }
+    document.getElementById('saveTimeBtn').addEventListener('click', async ()=>{
+      const weekdaysArea= document.getElementById('weekdaysArea');
+      const specialArea= document.getElementById('specialArea');
+      const wDivs= weekdaysArea.querySelectorAll('div');
+      const weekdays=[];
+      wDivs.forEach(div=>{
+        const labelTxt= div.querySelector('label').textContent;
+        const day= labelTxt.split('：')[0].trim(); 
+        const inps= div.querySelectorAll('input');
+        const openVal= inps[0].value;
+        const closeVal= inps[1].value;
+        weekdays.push({ day, open:openVal, close:closeVal });
+      });
+      const sDivs= specialArea.querySelectorAll('div');
+      const special=[];
+      sDivs.forEach(div=>{
+        const inps= div.querySelectorAll('input');
+        special.push({
+          startDate: inps[0].value,
+          endDate:   inps[1].value,
+          open:      inps[2].value,
+          close:     inps[3].value
+        });
+      });
+      const bodyObj= { weekdays, special };
+      try {
+        const r= await fetch(`${baseURL}/api/store/time`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(bodyObj)
+        });
+        const rd= await r.json();
+        alert(rd.message);
+      } catch(err){
+        console.error('saveTime error:', err);
+      }
+    });
+
+    /* =========== 11. 初始化 & 登出 =========== */
+    async function init(){
+      await loadConfig();    // 先讀 config.json, lineApiConfig.json, notifyTemplate.json
+      // 再執行後續
+      loadCustomers(); 
+      loadCategories(); 
+      loadPrices();
+      loadWashing();
+      loadUnpicked();
+      loadHistory();
+      loadStoreTime();
+    }
+    init();
+
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{
+      localStorage.clear();
+      window.location.href='./login.html';
+    });
+  </script>
+</body>
+</html>
